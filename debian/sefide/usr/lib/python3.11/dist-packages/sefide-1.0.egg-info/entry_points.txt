@@ -1,0 +1,2 @@
+[console_scripts]
+sefide = sefide.main:main

@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python3
+
+override_dh_install:
+	dh_install
+	install -m 755 $(CURDIR)/sefide.py /usr/local/bin/sefide.py
+	install -d $(DESTDIR)/usr/bin
+	install -m 755 $(CURDIR)/sefide.py $(DESTDIR)/usr/bin/sefide.py
+	install -d $(DESTDIR)/usr/share/applications
+	install -m 755 $(CURDIR)/debian/sefide.desktop $(DESTDIR)/usr/share/applications/sefide.desktop
+	install -d $(DESTDIR)/usr/share/icons/hicolor/48x48/apps
+	install -m 755 $(CURDIR)/debian/sefidelo.png $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/sefidelo.png

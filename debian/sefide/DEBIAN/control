@@ -1,0 +1,11 @@
+Package: sefide
+Version: 1.0-1
+Architecture: all
+Maintainer: Fatih ÖNDER <fatih@algyazilim.com>
+Installed-Size: 71
+Depends: python3-pyqt5
+Section: python
+Priority: optional
+Homepage: https://algyazilim.com
+Description: sefide - Dosya güvenli ve kalıcı yok etme aracı
+ SEFIDE, Dosya ve klasörlerinizi güvenli bir şekilde kalıcı olarak yok etmeniz için tasarlanmış güçlü bir araçtır.

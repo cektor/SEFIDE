@@ -1,0 +1,8 @@
+sefide.desktop
+setup.py
+sefide/sefide.py
+sefide.egg-info/PKG-INFO
+sefide.egg-info/SOURCES.txt
+sefide.egg-info/dependency_links.txt
+sefide.egg-info/entry_points.txt
+sefide.egg-info/top_level.txt

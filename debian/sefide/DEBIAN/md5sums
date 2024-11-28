@@ -1,0 +1,12 @@
+5ec5022ccbb6240c386e3ce8900998a5  usr/bin/sefide
+3ca4569db0947d08b5ba80147838eab4  usr/bin/sefide.py
+06af8618dcd626b26a3c5fbbc053085c  usr/lib/python3.11/dist-packages/sefide-1.0.egg-info/PKG-INFO
+68b329da9893e34099c7d8ad5cb9c940  usr/lib/python3.11/dist-packages/sefide-1.0.egg-info/dependency_links.txt
+410313abc21f1c89a638f1bd09ff81d1  usr/lib/python3.11/dist-packages/sefide-1.0.egg-info/entry_points.txt
+5c705fb58a274878e75feb9f44067ab9  usr/lib/python3.11/dist-packages/sefide-1.0.egg-info/top_level.txt
+c4feb01322129c93d7d822e134540f3a  usr/lib/python3.11/dist-packages/sefide/__pycache__/sefide.cpython-311.pyc
+5ffe3e158d4f79ef78decc7cb3d4878c  usr/lib/python3.11/dist-packages/sefide/sefide.py
+7a30f09b7c2c9acac98c318edb057ffe  usr/share/applications/sefide.desktop
+5ce555412d36ad7437c46157c99b1748  usr/share/doc/sefide/changelog.Debian.gz
+d96d23fd5d9511946de80da13756c71e  usr/share/doc/sefide/copyright
+c28651e52e3e9013fb4f121c40dcac50  usr/share/icons/hicolor/48x48/apps/sefidelo.png

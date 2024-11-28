@@ -1,0 +1,4 @@
+#!/bin/bash
+sefide.py usr/bin/
+sefide.desktop usr/share/applications/
+debian/sefidelo.png /usr/share/icons/hicolor/48x48/apps/
