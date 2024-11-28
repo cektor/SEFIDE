@@ -15,7 +15,7 @@ This application has been developed to ensure your digital security
 ![Linux(pardus)](screenshot/sefide_linux.png)  
 
 # Windows Screenshot
-![Windows(11)](ScreenShot/enco_windows.png) 
+![Windows(11)](screenshot/sefide_windows.png) 
 
 --------------------
 Install Git Clone and Python3
