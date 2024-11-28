@@ -106,7 +106,7 @@ pyinstaller --onefile --noconsole enco.py
 
 Linux (based debian) Terminal: Linux (debian based distributions) To install directly from Terminal.
 ```bash
- wget -O EnCo_Linux64.deb https://github.com/cektor/EnCo/releases/download/1.00/Setup_Linux64.deb && sudo apt install ./EnCo_Linux64.deb && sudo apt-get install -f
+ wget -O EnCo_Linux64.deb https://github.com/cektor/SEFIDE/releases/download/1.00/Setup_Linux64.deb && sudo apt install ./Setup_Linux64.deb && sudo apt-get install -f
 ```
 
 Windows Installer CMD (PowerShell): To Install from Windows CMD with Direct Connection.
@@ -114,6 +114,6 @@ Windows Installer CMD (PowerShell): To Install from Windows CMD with Direct Conn
 powershell -Command "Invoke-WebRequest -Uri 'https://github.com/cektor/EnCo/releases/download/1.00/Setup_Win64.exe' -OutFile 'Setup_Win64.exe'" && start /wait Setup_Win64.exe
 ```
 
-Release Page: https://github.com/cektor/EnCo/releases/tag/1.00
+Release Page: https://github.com/cektor/SEFIDE/releases/tag/1.00
 
 ----------------------------------
