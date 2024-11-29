@@ -64,7 +64,7 @@ sudo apt-get install qttools5-dev-tools
 
 
 # Installation
-Install EnCo
+Install SEFIDE
 
 ```bash
 sudo git clone https://github.com/cektor/SEFIDE.git
