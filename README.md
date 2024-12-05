@@ -1,3 +1,7 @@
+<a href="https://github.com/pedromxavier/flag-badges">
+    <img src="https://raw.githubusercontent.com/pedromxavier/flag-badges/main/badges/TR.svg" alt="made in TR">
+</a>
+
 # SEFIDE
 SEFIDE is a powerful cross-platform tool designed to securely and permanently destroy your files. Today, sensitive information and files in the wrong hands can lead to serious security issues. 
 This application has been developed to ensure your digital security
