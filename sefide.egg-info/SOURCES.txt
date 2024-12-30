@@ -1,3 +1,4 @@
+LICENSE.txt
 sefide.desktop
 setup.py
 sefide/sefide.py

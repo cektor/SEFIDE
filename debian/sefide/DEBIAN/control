@@ -2,7 +2,7 @@ Package: sefide
 Version: 1.0-1
 Architecture: all
 Maintainer: Fatih ÖNDER <fatih@algyazilim.com>
-Installed-Size: 71
+Installed-Size: 77
 Depends: python3-pyqt5
 Section: python
 Priority: optional

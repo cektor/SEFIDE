@@ -29,17 +29,29 @@ class Translations:
             'delete_failed': "{} dosyası yok edilemedi!",
             'completion_message': "Tamamlandı",
             'ready': "Hazır",
+            'language_menu': "Dil",
+            'language_turkish': "Türkçe",
+            'language_english': "İngilizce",
+            'file_too_large': "Uyarı: {} dosyası çok büyük (>1GB). İşlem uzun sürebilir.",
+            'unexpected_error': "Beklenmeyen hata: {}",
+            'logo_load_failed': "Logo yüklenemedi",
+            'selected_files': "Seçilen: {}",
+            'about_dots': "...",
+            'completed_title': "Tamamlandı",
             'about_text': (
                 "SEFIDE\n"
                 "(SEcure FIle DEstructor)\n\n"
-                " SEFIDE, Dosya ve klasörlerinizi güvenli bir şekilde kalıcı olarak yok etmeniz için tasarlanmış güçlü bir araçtır. Günümüzde, hassas bilgilerin ve dosyaların yanlış ellere geçmesi ciddi güvenlik sorunlarına yol açabilir. Bu uygulama, dijital güvenliğinizi sağlamak için geliştirilmiştir.\n\n"
+                " SEFIDE, Dosyalarınızı güvenli bir şekilde kalıcı olarak yok etmeniz için tasarlanmış güçlü bir araçtır. "
+                "Günümüzde, hassas bilgilerin ve dosyaların yanlış ellere geçmesi ciddi güvenlik sorunlarına yol açabilir. "
+                "Bu uygulama, dijital güvenliğinizi sağlamak için geliştirilmiştir.\n\n"
                 " Geliştirici: ALG Yazılım Inc. | www.algyzilim.com | info@algyazilim.com\n\n"
                 " Fatih ÖNDER (CekToR) | wwww.fatihonder.org.tr | fatih@algyazilim.com\n\n"
                 " EnCo Tüm Hakları Saklıdır. 2024 ALG Software Inc\n\n"
                 " ALG Yazılım Pardus'a Göç'ü Destekler.\n\n"
                 " SEFIDE Sürüm: 1.0\n\n"
             ),
-            'close': "Kapat"
+            'close': "Kapat",
+            'select_file': "Dosya Seç"
         },
         'English': {
             'app_title': "✨ SEFIDE ✨",
@@ -55,22 +67,34 @@ class Translations:
             'drag_drop_label': "Drag and drop files or folders, or click anywhere to select.",
             'not_started': "No operation started yet",
             'processing_start': "Starting process...",
-            'processing_file': "is being destroyed: {}",
+            'processing_file': "Destroying: {}",
             'delete_success': "File(s) successfully destroyed!",
-            'delete_failed': "{} file could not be destroyed!",
+            'delete_failed': "Failed to destroy file: {}",
             'completion_message': "Completed",
             'ready': "Ready",
+            'language_menu': "Language",
+            'language_turkish': "Turkish",
+            'language_english': "English",
+            'file_too_large': "Warning: {} file is too large (>1GB). Operation may take longer.",
+            'unexpected_error': "Unexpected error: {}",
+            'logo_load_failed': "Failed to load logo",
+            'selected_files': "Selected: {}",
+            'about_dots': "...",
+            'completed_title': "Completed",
             'about_text': (
                 "SEFIDE\n"
                 "(SEcure FIle DEstructor)\n\n"
-                " SEFIDE is a powerful tool designed to securely and permanently destroy your files and folders. In today's world, sensitive information and files falling into the wrong hands can lead to serious security issues. This application is developed to ensure your digital security.\n\n"
+                " SEFIDE is a powerful tool designed to securely and permanently destroy your files and folders. "
+                "In today's world, sensitive information and files falling into the wrong hands can lead to serious security issues. "
+                "This application is developed to ensure your digital security.\n\n"
                 " Developer: ALG Software Inc. | www.algyzilim.com | info@algyazilim.com\n\n"
                 " Fatih ÖNDER (CekToR) | wwww.fatihonder.org.tr | fatih@algyazilim.com\n\n"
                 " EnCo All Rights Reserved. 2024 ALG Software Inc\n\n"
                 " ALG Software Supports Migration to Pardus.\n\n"
                 " SEFIDE Version: 1.0\n\n"
             ),
-            'close': "Close"
+            'close': "Close",
+            'select_file': "Select File"
         }
     }
 
@@ -106,9 +130,11 @@ def overwrite_file(path, passes=1):
             for _ in range(passes):
                 file.seek(0)
                 file.write(bytearray(random.getrandbits(8) for _ in range(length)))
+                file.flush()
+                os.fsync(file.fileno())
         os.remove(path)
     except Exception as e:
-        print(f"Hata: {e}")
+        print("Hata:", str(e))
         return False
     return True
 
@@ -148,16 +174,34 @@ class DeleteFilesThread(QThread):
         self.translation = translation
 
     def run(self):
-        total_files = len(self.file_paths)
-        for index, file in enumerate(self.file_paths):
-            self.current_file_signal.emit(self.translation['processing_file'].format(os.path.basename(file)))
-            
-            if not overwrite_file(file, self.passes):
-                self.complete_signal.emit(self.translation['delete_failed'].format(file))
-            else:
+        try:
+            total_files = len(self.file_paths)
+            for index, file in enumerate(self.file_paths):
+                if not os.path.exists(file):
+                    continue
+                    
+                self.current_file_signal.emit(
+                    self.translation['processing_file'].format(os.path.basename(file))
+                )
+                
+                # Dosya boyutu kontrolü
+                file_size = os.path.getsize(file)
+                if file_size > 1024 * 1024 * 1024:  # 1GB
+                    self.complete_signal.emit(
+                        f"Uyarı: {os.path.basename(file)} dosyası çok büyük (>1GB). İşlem uzun sürebilir."
+                    )
+                
+                if not overwrite_file(file, self.passes):
+                    self.complete_signal.emit(
+                        self.translation['delete_failed'].format(os.path.basename(file))
+                    )
+                
                 self.progress_signal.emit(int((index + 1) / total_files * 100))
-        
-        self.complete_signal.emit(self.translation['delete_success'])
+                
+            self.complete_signal.emit(self.translation['delete_success'])
+            
+        except Exception as e:
+            self.complete_signal.emit(f"Beklenmeyen hata: {str(e)}")
 
 # Ana Uygulama
 class SecureDeleteApp(QMainWindow):
@@ -187,26 +231,26 @@ class SecureDeleteApp(QMainWindow):
         self.language = language
         self.save_language(language)
         self.translation = Translations.get_language(language)
-        self.setup_ui()
+        
+        # Mevcut pencere içeriğini temizle
+        central_widget = self.centralWidget()
+        if central_widget:
+            central_widget.deleteLater()
+        
+        # UI'ı yeniden oluştur (menü hariç)
+        self.setup_ui(preserve_menu=True)
 
-    def setup_ui(self):
-        # Reset window to prevent duplicating widgets
-        for widget in self.findChildren(QWidget):
-            widget.deleteLater()
-
+    def setup_ui(self, preserve_menu=False):
+        # Menüyü koru veya yeniden oluştur
+        if not preserve_menu:
+            self.create_menu_bar()
+        
+        # Pencere ayarları
         self.setWindowTitle(self.translation['app_title'])
         self.setWindowIcon(QIcon("sefidelo.png"))
         self.setFixedSize(320, 550)
-        self.setStyleSheet("background-color: #1F1F1F; color: #FBB318;")
 
-        # Uygulama İkonunu Ayarlama
-        if ICON_PATH:
-            self.setWindowIcon(QIcon(ICON_PATH))
-
-        # Create menu bar for language selection
-        self.create_menu_bar()
-
-        # Ana Widget ve Layout
+        # Ana widget ve layout
         central_widget = QWidget()
         main_layout = QVBoxLayout()
         main_layout.setSpacing(10)
@@ -214,7 +258,7 @@ class SecureDeleteApp(QMainWindow):
         self.setCentralWidget(central_widget)
 
         # "Hakkında" tıklanabilir label
-        about_label = QLabel("...")
+        about_label = QLabel(self.translation['about_dots'])
         about_label.setStyleSheet("font-size: 15px; color: #f0a500;")
         about_label.setAlignment(Qt.AlignCenter)
         about_label.mousePressEvent = self.show_about_dialog
@@ -222,7 +266,12 @@ class SecureDeleteApp(QMainWindow):
 
         # "SEFIDE" Başlık
         sefide_label = QLabel("SEFIDE")
-        sefide_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #f0a500;")
+        sefide_label.setStyleSheet("""
+            font-size: 28px; 
+            font-weight: bold; 
+            color: #FBB318;
+            margin: 10px;
+        """)
         sefide_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(sefide_label)
 
@@ -237,12 +286,10 @@ class SecureDeleteApp(QMainWindow):
         logo_label = QLabel()
         if LOGO_PATH and os.path.exists(LOGO_PATH):
             logo_pixmap = QPixmap(LOGO_PATH)
-            if logo_pixmap.isNull():
-                logo_label.setText("Logo yüklenemedi")
-            else:
-                logo_label.setPixmap(logo_pixmap.scaled(100, 100, Qt.KeepAspectRatio))
+            if not logo_pixmap.isNull():
+                logo_label.setPixmap(logo_pixmap.scaled(150, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         else:
-            logo_label.setText("Logo yüklenemedi")
+            logo_label.setText(self.translation['logo_load_failed'])
         logo_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(logo_label)
 
@@ -250,6 +297,7 @@ class SecureDeleteApp(QMainWindow):
         self.security_label = QLabel(self.translation['security_level'])
         self.security_combo = QComboBox()
         self.security_combo.addItems(self.translation['security_levels'])
+        self.security_combo.setMinimumHeight(30)
         main_layout.addWidget(self.security_label)
         main_layout.addWidget(self.security_combo)
 
@@ -262,6 +310,9 @@ class SecureDeleteApp(QMainWindow):
         # İlerleme Çubuğu
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
+        self.progress_bar.setMinimumHeight(20)
+        self.progress_bar.setTextVisible(True)
+        self.progress_bar.setFormat("%p%")
         main_layout.addWidget(self.progress_bar)
 
         # Mesaj Alanı
@@ -276,13 +327,126 @@ class SecureDeleteApp(QMainWindow):
         # Silinecek Dosyalar
         self.file_paths = []
 
+        # Stil tanımlamaları güncelleme
+        MAIN_STYLE = """
+            QMainWindow {
+                background-color: #1F1F1F;
+            }
+            QLabel {
+                color: #FBB318;
+                font-size: 14px;
+            }
+            QPushButton {
+                background-color: #FBB318;
+                color: #1F1F1F;
+                border: none;
+                padding: 5px;
+                border-radius: 3px;
+            }
+            QPushButton:hover {
+                background-color: #FAC13C;
+            }
+            QComboBox {
+                background-color: #2D2D2D;
+                color: #FBB318;
+                border: 1px solid #FBB318;
+                padding: 5px;
+                border-radius: 3px;
+                min-width: 150px;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 20px;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #FBB318;
+                margin-right: 5px;
+            }
+            QComboBox:hover {
+                background-color: #3D3D3D;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2D2D2D;
+                color: #FBB318;
+                selection-background-color: #3D3D3D;
+                selection-color: #FBB318;
+                border: 1px solid #FBB318;
+            }
+            QProgressBar {
+                background-color: #2D2D2D;
+                border: 1px solid #FBB318;
+                border-radius: 3px;
+                text-align: center;
+                color: #808080;
+                padding: 1px;
+            }
+            QProgressBar::chunk {
+                background-color: #FBB318;
+                width: 1px;
+                margin: 0px;
+            }
+            QMenuBar {
+                background-color: #1F1F1F;
+                color: #FBB318;
+            }
+            QMenuBar::item {
+                background-color: #1F1F1F;
+                color: #FBB318;
+                padding: 5px 10px;
+            }
+            QMenuBar::item:selected {
+                background-color: #2D2D2D;
+            }
+            QMenu {
+                background-color: #1F1F1F;
+                color: #FBB318;
+                border: 1px solid #FBB318;
+            }
+            QMenu::item {
+                padding: 5px 20px;
+            }
+            QMenu::item:selected {
+                background-color: #2D2D2D;
+            }
+            QMessageBox {
+                background-color: #1F1F1F;
+                color: #FBB318;
+            }
+            QMessageBox QLabel {
+                color: #FBB318;
+                font-size: 14px;
+            }
+            QMessageBox QPushButton {
+                background-color: #FBB318;
+                color: #1F1F1F;
+                border: none;
+                padding: 5px 15px;
+                border-radius: 3px;
+                min-width: 80px;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #FAC13C;
+            }
+        """
+        
+        self.setStyleSheet(MAIN_STYLE)
+
     def create_menu_bar(self):
         menubar = self.menuBar()
-        language_menu = menubar.addMenu('Language')
+        language_menu = menubar.addMenu(self.translation['language_menu'])
         
-        for lang in ['Turkish', 'English']:
-            action = QAction(lang, self)
-            action.triggered.connect(lambda checked, l=lang: self.change_language(l))
+        # Dil seçenekleri için çevirileri kullan
+        languages = {
+            'Turkish': self.translation['language_turkish'],
+            'English': self.translation['language_english']
+        }
+        
+        for lang_key, lang_display in languages.items():
+            action = QAction(lang_display, self)
+            action.triggered.connect(lambda checked, l=lang_key: self.change_language(l))
             language_menu.addAction(action)
 
     def show_about_dialog(self, event=None):
@@ -296,7 +460,7 @@ class SecureDeleteApp(QMainWindow):
     def dropEvent(self, event):
         self.file_paths = [url.toLocalFile() for url in event.mimeData().urls()]
         if self.file_paths:
-            self.drag_drop_label.setText(f"Seçilen: {', '.join(self.file_paths)}")
+            self.drag_drop_label.setText(f"{self.translation['selected_files']}".format(', '.join(self.file_paths)))
             self.delete_files()
 
     def delete_files(self):
@@ -324,7 +488,12 @@ class SecureDeleteApp(QMainWindow):
         self.progress_bar.setValue(value)
 
     def on_delete_complete(self, message):
-        QMessageBox.information(self, "Tamamlandı", message)
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle(self.translation['completed_title'])
+        msg_box.setText(message)
+        msg_box.setIcon(QMessageBox.Information)
+        msg_box.setStyleSheet(self.styleSheet())  # Ana temayı MessageBox'a uygula
+        msg_box.exec_()
         
         # Progress bar'ı sıfırlamak için timer kullanıyoruz
         QTimer.singleShot(2000, self.reset_progress_bar)
@@ -332,20 +501,27 @@ class SecureDeleteApp(QMainWindow):
     def reset_progress_bar(self):
         """Progress bar'ı sıfırlayan metod"""
         self.progress_bar.setValue(0)
-        self.current_file_label.setText("Hazır")
-        self.drag_drop_label.setText("Dosya veya klasör sürükleyin ya da seçmek için herhangi bir yere tıklayın.")
+        self.current_file_label.setText(self.translation['ready'])
+        self.drag_drop_label.setText(self.translation['drag_drop_label'])
 
     def mousePressEvent(self, event):
         """Form üzerinde herhangi bir yere tıklanınca dosya seçme diyalogu açılır."""
-        file_paths, _ = QFileDialog.getOpenFileNames(self, "Dosya Seç", "", "Tüm Dosyalar (*)")
+        file_paths, _ = QFileDialog.getOpenFileNames(
+            self, 
+            self.translation['select_file'],
+            "", 
+            "Tüm Dosyalar (*)"
+        )
         if file_paths:
             self.file_paths = file_paths
-            self.drag_drop_label.setText(f"Seçilen: {', '.join(file_paths)}")
+            self.drag_drop_label.setText(f"{self.translation['selected_files']}".format(', '.join(file_paths)))
             self.delete_files()
 
 # Uygulama Başlatma
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    if ICON_PATH:
+        app.setWindowIcon(QIcon(ICON_PATH))
     window = SecureDeleteApp()
     window.show()
     sys.exit(app.exec_())
